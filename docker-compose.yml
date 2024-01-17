@@ -1,0 +1,45 @@
+version: '3.3'
+services:
+  odoo:
+    # platform: linux/amd64 # for run on arm cpu
+    build: .
+    container_name: odoo17-beta
+    ports:
+      - 8069:8069
+      - 8071:8071
+      - 8666:8072
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - odoo-web-addons:/mnt/extra-addons
+      - ./custom-addons:/mnt/custom-addons
+      - ./odoo.conf:/etc/odoo/odoo.conf
+    depends_on:
+      - db
+    networks:
+      - odoo-network
+    logging:
+      options:
+        max-size: 10m
+    tty: true
+    command: odoo $OPTIONS
+  db:
+    image: postgres:15
+    container_name: odoo17-beta-db
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_DB=postgres
+    networks:
+      - odoo-network
+    logging:
+      options:
+        max-size: 10m 
+networks:
+  odoo-network:
+    driver: bridge
+volumes:
+  odoo-web-data:
+  odoo-web-addons:
+  odoo-db-data:
